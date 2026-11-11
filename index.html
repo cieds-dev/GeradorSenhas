@@ -47,7 +47,7 @@ code{font:1.15rem ui-monospace,Consolas,Menlo,monospace;overflow-wrap:anywhere;u
 </header>
 <div class="card">
   <label for="portal">Portal</label>
-  <input id="portal" type="text" placeholder="producao.com.br" autocomplete="off" spellcheck="false">
+  <input id="portal" type="text" placeholder="SuporteCIEDS@ ou producao.com.br" autocomplete="off" spellcheck="false">
   <details>
     <summary>Ajustar a regra</summary>
     <label for="sep" style="margin-top:12px">Símbolo após o nome</label>
@@ -69,15 +69,20 @@ code{font:1.15rem ui-monospace,Consolas,Menlo,monospace;overflow-wrap:anywhere;u
 <script>
 const $=id=>document.getElementById(id);
 function nomeDoPortal(t){
-  let s=t.trim().toLowerCase().replace(/^[a-z]+:\/\//,"").replace(/^www\./,"").split(/[\/?#]/)[0].split(".")[0];
-  return s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,"");
+  let s=t.trim();
+  if(/^[a-z]+:\/\//i.test(s)||/\.[a-z]{2,}/i.test(s)){
+    s=s.replace(/^[a-z]+:\/\//i,"").replace(/^www\./i,"").split(/[\/?#]/)[0].split(".")[0];
+  }
+  return s;
 }
 function gerar(){
   const nome=nomeDoPortal($("portal").value);
   if(!nome){$("out").hidden=true;$("hint").textContent="Digite o endereço do portal, por exemplo producao.com.br.";return}
   const m={a:$("va").value,e:$("ve").value,i:$("vi").value,o:$("vo").value,u:$("vu").value};
-  const vogais=[...nome].filter(c=>m[c]!==undefined).map(c=>m[c]).join("");
-  const senha=nome.charAt(0).toUpperCase()+nome.slice(1)+$("sep").value+vogais;
+  const letra=c=>c.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+  const vogais=[...nome].filter(c=>m[letra(c)]!==undefined).map(c=>m[letra(c)]).join("");
+  const sep=$("sep").value;
+  const senha=nome+(sep&&nome.endsWith(sep)?"":sep)+vogais;
   $("pw").textContent=senha;$("out").hidden=false;
   $("hint").textContent=senha.length<12?"Esta senha tem "+senha.length+" caracteres. Alguns sistemas exigem um mínimo maior.":"";
 }
